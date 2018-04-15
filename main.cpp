@@ -12,7 +12,10 @@ int main(const int argc, const char* argv[]) {
 
     hite::ElevationTile tile(filepath);
 
-    hite::Coordinate test_coord1(13.4109, 52.5283);
-    hite::Elevation elevation1 = tile.GetElevation(test_coord1);
-    std::cout << elevation1 << std::endl;
+    hite::Coordinate top_of_hill(13.414049, 52.550679);
+    hite::Elevation top = tile.GetElevation(top_of_hill);
+    hite::Coordinate bottom_of_hill(13.409757, 52.528493);
+    hite::Elevation bottom = tile.GetElevation(bottom_of_hill);
+    std::cout << top << std::endl;
+    std::cout << bottom << std::endl;
 }

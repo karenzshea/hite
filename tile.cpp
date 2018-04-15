@@ -4,6 +4,14 @@
 
 namespace hite
 {
+TileCoordinate GetTileCoordinate(const Coordinate &coord)
+{
+    TileCoordinate tc{std::abs(coord.Longitude), std::abs(coord.Latitude)};
+    tc.U = tc.U - std::floor(tc.U);
+    tc.V = tc.V - std::floor(tc.V);
+    return tc;
+}
+
 Elevation ElevationTile::GetPixelData(const PixelCoordinate &pixel_coord)
 {
     auto lower_idx = 2 * ((pixel_coord.Y * MAX_TILE_SIZE) + pixel_coord.X);
@@ -26,14 +34,6 @@ Elevation ElevationTile::GetInterpolatedData(const TileCoordinate &tile_coord)
     int y1 = MAX_TILE_SIZE - std::round(tile_coord.V * MAX_TILE_SIZE);
     Elevation elevation = GetPixelData({x1, y1});
     return elevation;
-}
-
-TileCoordinate GetTileCoordinate(const Coordinate &coord)
-{
-    TileCoordinate tc;
-    tc.U = coord.Longitude - std::floor(coord.Longitude);
-    tc.V = coord.Latitude - std::floor(coord.Latitude);
-    return tc;
 }
 
 Elevation ElevationTile::GetElevation(const Coordinate &coord)

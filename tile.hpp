@@ -38,7 +38,7 @@ struct TileCoordinate {
     TileCoordinate() : U(MAX_DOUBLE), V(MAX_DOUBLE)
     {
     }
-    TileCoordinate(double &u, double &v)
+    TileCoordinate(double u, double v)
         : U(u), V(v) {
     }
     double U; // column
