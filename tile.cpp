@@ -1,13 +1,15 @@
 #include <cmath>
 
-#include "./tile.h"
+#include "./tile.hpp"
 
-namespace topowave
+namespace hite
 {
 Elevation ElevationTile::GetPixelData(const PixelCoordinate &pixel_coord)
 {
-    auto index = ((pixel_coord.Y) * MAX_TILE_SIZE) + pixel_coord.X;
-    return static_cast<Elevation>(elevation[index]);
+    auto lower_idx = 2 * ((pixel_coord.Y * MAX_TILE_SIZE) + pixel_coord.X);
+    auto upper_idx = lower_idx + 1;
+    int16_t swapped = static_cast<int16_t>(map[lower_idx]) << 8 | static_cast<int16_t>(map[upper_idx]);
+    return swapped;
 }
 
 bool ElevationTile::InsideTile(const Coordinate &coord)
@@ -20,13 +22,13 @@ Elevation ElevationTile::GetInterpolatedData(const TileCoordinate &tile_coord)
 {
     // TODO bilinear interpolation?
     // convert tile coordinate into pixel coordinate
-    int x1 = std::round(tile_coord.U * 1201);
-    int y1 = 1201 - std::round(tile_coord.V * 1201);
+    int x1 = std::round(tile_coord.U * MAX_TILE_SIZE);
+    int y1 = MAX_TILE_SIZE - std::round(tile_coord.V * MAX_TILE_SIZE);
     Elevation elevation = GetPixelData({x1, y1});
     return elevation;
 }
 
-TileCoordinate ElevationTile::GetTileCoordinate(const Coordinate &coord)
+TileCoordinate GetTileCoordinate(const Coordinate &coord)
 {
     TileCoordinate tc;
     tc.U = coord.Longitude - std::floor(coord.Longitude);
