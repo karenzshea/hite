@@ -76,16 +76,16 @@ struct ElevationTile {
         {
             throw std::runtime_error("Couldn't open hgt file!");
         }
-        fileInfo = {0};
-        if (fstat(fd, &fileInfo) == -1)
+        file_stat = {0};
+        if (fstat(fd, &file_stat) == -1)
         {
             throw std::runtime_error("Couldn't get size of hgt file!");
         }
-        if (fileInfo.st_size == 0 || fileInfo.st_size != 25934402)
+        if (file_stat.st_size == 0 || file_stat.st_size != 25934402)
         {
             throw std::runtime_error("Hgt file is empty or the wrong size!");
         }
-        map = static_cast<char *>(mmap(0, fileInfo.st_size, PROT_READ, MAP_PRIVATE, fd, 0));
+        map = static_cast<char *>(mmap(0, file_stat.st_size, PROT_READ, MAP_PRIVATE, fd, 0));
         if (map == MAP_FAILED)
         {
             throw std::runtime_error("Error mmapping file!");
@@ -95,7 +95,7 @@ struct ElevationTile {
         elevation((MAX_TILE_SIZE * MAX_TILE_SIZE) * sizeof(int16_t)) {
     }
     ~ElevationTile() {
-        if (munmap(map, fileInfo.st_size) == -1)
+        if (munmap(map, file_stat.st_size) == -1)
         {
             close(fd);
         }
@@ -111,7 +111,7 @@ struct ElevationTile {
     int x, y;
     std::vector<unsigned char> elevation;
     char *map;
-    struct stat fileInfo;
+    struct stat file_stat;
 
     private:
     bool InsideTile(const Coordinate &coordinate);
