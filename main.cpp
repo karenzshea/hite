@@ -14,6 +14,7 @@ extern "C" {
 #include <unistd.h>
 };
 
+#include "tile_index.hpp"
 #include "tile.hpp"
 
 int main(const int argc, const char* argv[]) {
@@ -25,43 +26,31 @@ int main(const int argc, const char* argv[]) {
     {
         throw std::runtime_error("Could not stat file or file path");
     }
-    std::vector<const char*> paths;
-    // if filepath is a file push it into paths
-    // if it's a directory, push all files *.hgt in the directory into paths
+
+    std::vector<const char*> files;
+    // handle either a single file or a path to a directory
     if ((filepath_stat.st_mode & S_IFMT) == S_IFREG)
     {
-        paths.push_back(std::move(filepath));
+        files.push_back(std::move(filepath));
     }
     else if ((filepath_stat.st_mode & S_IFMT) == S_IFDIR)
     {
-        DIR* dir_stream = dir_stream = opendir(filepath);
-        struct dirent *dirp;
-        if (dir_stream == NULL)
-        {
-            throw std::runtime_error("Could not open directory for reading");
-        }
-        std::regex re{".*+\\.hgt"};
-        while ((dirp = readdir(dir_stream)) != NULL)
-        {
-            std::cout << std::string(dirp->d_name) << std::endl;
-            if (std::regex_match(dirp->d_name, re))
-            {
-                paths.push_back(dirp->d_name);
-            }
-        }
+        hite::readFileDir(filepath, files);
     }
-    std::cout << "Reading " << paths.size() << " path(s)..." << std::endl;
+    std::cout << "Reading " << files.size() << " path(s)..." << std::endl;
 
     // TODO read tile data into tile index structure for querying
+    // i.e. read all tilepaths into elevation tile instances, and provide
+    // an interface for querying a tile
     std::uint8_t i = 0;
-    for (; i < paths.size(); i++)
+    for (; i < files.size(); i++)
     {
-        char filename[strlen(filepath) + 1 + strlen(paths[i])];
-        strcpy(filename, filepath);
-        strcat(filename, "/");
-        strcat(filename, paths[i]);
-        std::cout << filename << std::endl;
-        hite::ElevationTile tile(filename);
+        char fullpath[strlen(filepath) + 1 + strlen(files[i])];
+        strcpy(fullpath, filepath);
+        strcat(fullpath, "/");
+        strcat(fullpath, files[i]);
+        std::cout << fullpath << std::endl;
+        hite::ElevationTile tile(fullpath);
 
         hite::Coordinate top_of_hill(13.414049, 52.550679);
         hite::Elevation top = tile.GetElevation(top_of_hill);
