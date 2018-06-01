@@ -22,19 +22,23 @@ extern "C" {
 namespace hite
 {
 
+// TODO encode way to return no data for Elevation
 using Elevation = std::int16_t;
 constexpr const int MAX_TILE_SIZE = 3601;
 constexpr const double MAX_DOUBLE = std::numeric_limits<double>::max();
+constexpr const int MAX_INT = std::numeric_limits<int>::max();
 constexpr const int NUM_DEGREE_TILES = 360 * 180;
 
 struct Coordinate {
+    Coordinate() = default;
     Coordinate(double Lon, double Lat)
         : Longitude(Lon), Latitude(Lat) {
     }
-    double Longitude;
-    double Latitude;
+    double Longitude = MAX_DOUBLE;
+    double Latitude = MAX_DOUBLE;
 };
 
+// e.g. 13.415852,52.485185 => 0.415852,0.485185
 struct TileCoordinate {
     TileCoordinate() : U(MAX_DOUBLE), V(MAX_DOUBLE)
     {
@@ -57,64 +61,23 @@ struct PixelCoordinate {
 TileCoordinate GetTileCoordinate(const Coordinate &coord);
 
 struct ElevationTile {
-    ElevationTile(int _x, int _y, const char* filepath) : x(_x), y(_y) {
-        // mmap tile file
-        fd = open(filepath, O_RDWR, (mode_t)0222);
-        if (fd == -1)
-        {
-            throw std::runtime_error("Couldn't open hgt file!");
-        }
-        file_stat = {0};
-        if (fstat(fd, &file_stat) == -1)
-        {
-            throw std::runtime_error("Couldn't get size of hgt file!");
-        }
-        if (file_stat.st_size == 0 || file_stat.st_size != 25934402)
-        {
-            throw std::runtime_error("Hgt file is empty or the wrong size!");
-        }
-        map = static_cast<char *>(mmap(0, file_stat.st_size, PROT_READ, MAP_PRIVATE, fd, 0));
-        if (map == MAP_FAILED)
-        {
-            throw std::runtime_error("Error mmapping file!");
-        }
-    }
-    ElevationTile(const char* filepath) {
-        std::regex re{"^.+([0-9]{2}).+([0-9]{3})\\.hgt"};
-        std::cmatch out;
-        if (std::regex_match(filepath, out, re))
-        {
-            if (out.size() != 3) throw std::runtime_error("Could not parse file name");
-
-            x = std::stoi(out[1]);
-            y = std::stoi(out[2]);
-        }
-        else
-        {
-            throw std::runtime_error("Could not parse file name");
-        }
-        ElevationTile(x, y, filepath);
-    }
-    ElevationTile(int _x, int _y) : x(_x), y(_y),
-        elevation((MAX_TILE_SIZE * MAX_TILE_SIZE) * sizeof(int16_t)) {
-    }
-    ~ElevationTile() {
-        if (munmap(map, file_stat.st_size) == -1)
-        {
-            close(fd);
-        }
-        close(fd);
-    };
-
+    ElevationTile(int _x, int _y, const char* filepath);
+    ElevationTile(const char* filepath);
+    ElevationTile(int _x, int _y);
+    ElevationTile();
+    ~ElevationTile();
     // methods
     Elevation GetElevation(const Coordinate &coord);
     Elevation GetInterpolatedData(const TileCoordinate &tile_coord);
     Elevation GetPixelData(const PixelCoordinate &pixel_coord);
 
     // members
-    int x, y;
+    int x = MAX_INT;
+    int y = MAX_INT;
+    //std::vector<unsigned char> elevation{(MAX_TILE_SIZE * MAX_TILE_SIZE) * sizeof(int16_t)};
     std::vector<unsigned char> elevation;
-    char *map;
+    char *map = nullptr;
+    // Q how to define default value for struct stat?
     struct stat file_stat;
 
     private:

@@ -42,7 +42,7 @@ int main(const int argc, const char* argv[]) {
     // TODO read tile data into tile index structure for querying
     // i.e. read all tilepaths into elevation tile instances, and provide
     // an interface for querying a tile
-    std::uint8_t i = 0;
+    std::size_t i = 0;
     for (; i < files.size(); i++)
     {
         char fullpath[strlen(filepath) + 1 + strlen(files[i])];
