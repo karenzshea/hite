@@ -38,25 +38,12 @@ int main(const int argc, const char* argv[]) {
         hite::readFileDir(filepath, files);
     }
     std::cout << "Reading " << files.size() << " path(s)..." << std::endl;
+    hite::TileIndex tile_index(filepath, files);
 
-    // TODO read tile data into tile index structure for querying
-    // i.e. read all tilepaths into elevation tile instances, and provide
-    // an interface for querying a tile
-    std::size_t i = 0;
-    for (; i < files.size(); i++)
-    {
-        char fullpath[strlen(filepath) + 1 + strlen(files[i])];
-        strcpy(fullpath, filepath);
-        strcat(fullpath, "/");
-        strcat(fullpath, files[i]);
-        std::cout << fullpath << std::endl;
-        hite::ElevationTile tile(fullpath);
-
-        hite::Coordinate top_of_hill(13.414049, 52.550679);
-        hite::Elevation top = tile.GetElevation(top_of_hill);
-        hite::Coordinate bottom_of_hill(13.409757, 52.528493);
-        hite::Elevation bottom = tile.GetElevation(bottom_of_hill);
-        std::cout << top << std::endl;
-        std::cout << bottom << std::endl;
-    }
+    hite::Coordinate top_of_hill(13.414049, 52.550679);
+    hite::Elevation top = tile_index.Lookup(top_of_hill);
+    hite::Coordinate bottom_of_hill(13.409757, 52.528493);
+    hite::Elevation bottom = tile_index.Lookup(bottom_of_hill);
+    std::cout << top << std::endl;
+    std::cout << bottom << std::endl;
 }

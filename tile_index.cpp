@@ -35,9 +35,21 @@ namespace hite
         int offset_y = coordinate.Latitude + 90;
         return offset_x * offset_y;
     }
+    bool TileIndex::IsValidTile(const int index)
+    {
+        return tiles[index].map != nullptr;
+    }
     Elevation TileIndex::Lookup(const Coordinate &coordinate)
     {
-        // initalized Tile validation
+        // identify tile index of coordinate
+        // check that tile at tile index is valid
+        // call getElevation on tile
+        auto index = normalizeCoordToIndex(coordinate);
+        if (IsValidTile(index))
+        {
+            return tiles[index].GetElevation(coordinate);
+        }
+        return MAX_ELEVATION;
     }
     TileIndex::TileIndex(const char* dirpath, const std::vector<const char*> &files)
     {

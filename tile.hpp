@@ -19,20 +19,23 @@ extern "C" {
 #include <unistd.h>
 };
 
+#include "constants.hpp"
+
 namespace hite
 {
-
-// TODO encode way to return no data for Elevation
-using Elevation = std::int16_t;
-constexpr const int MAX_TILE_SIZE = 3601;
-constexpr const double MAX_DOUBLE = std::numeric_limits<double>::max();
-constexpr const int MAX_INT = std::numeric_limits<int>::max();
-constexpr const int NUM_DEGREE_TILES = 360 * 180;
 
 struct Coordinate {
     Coordinate() = default;
     Coordinate(double Lon, double Lat)
-        : Longitude(Lon), Latitude(Lat) {
+    {
+        if (Lon < 180.0 && Lon > -180.0)
+        {
+            Longitude = Lon;
+        }
+        if (Lat < 90.0 && Lat > -90.0)
+        {
+            Latitude = Lat;
+        }
     }
     double Longitude = MAX_DOUBLE;
     double Latitude = MAX_DOUBLE;
@@ -72,10 +75,9 @@ struct ElevationTile {
     Elevation GetPixelData(const PixelCoordinate &pixel_coord);
 
     // members
+    // Q what are these for?
     int x = MAX_INT;
     int y = MAX_INT;
-    //std::vector<unsigned char> elevation{(MAX_TILE_SIZE * MAX_TILE_SIZE) * sizeof(int16_t)};
-    std::vector<unsigned char> elevation;
     char *map = nullptr;
     // Q how to define default value for struct stat?
     struct stat file_stat;

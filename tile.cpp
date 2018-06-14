@@ -12,18 +12,13 @@ TileCoordinate GetTileCoordinate(const Coordinate &coord)
     return tc;
 }
 
+// ElevationTile
 Elevation ElevationTile::GetPixelData(const PixelCoordinate &pixel_coord)
 {
     auto lower_idx = 2 * ((pixel_coord.Y * MAX_TILE_SIZE) + pixel_coord.X);
     auto upper_idx = lower_idx + 1;
     int16_t swapped = static_cast<int16_t>(map[lower_idx]) << 8 | static_cast<int16_t>(map[upper_idx]);
     return swapped;
-}
-
-bool ElevationTile::InsideTile(const Coordinate &coord)
-{
-    TileCoordinate tc = GetTileCoordinate(coord);
-    return tc.U == x && tc.V == y;
 }
 
 Elevation ElevationTile::GetInterpolatedData(const TileCoordinate &tile_coord)
@@ -34,6 +29,12 @@ Elevation ElevationTile::GetInterpolatedData(const TileCoordinate &tile_coord)
     int y1 = MAX_TILE_SIZE - std::round(tile_coord.V * MAX_TILE_SIZE);
     Elevation elevation = GetPixelData({x1, y1});
     return elevation;
+}
+
+bool ElevationTile::InsideTile(const Coordinate &coord)
+{
+    TileCoordinate tc = GetTileCoordinate(coord);
+    return tc.U == x && tc.V == y;
 }
 
 Elevation ElevationTile::GetElevation(const Coordinate &coord)
@@ -81,11 +82,6 @@ ElevationTile::ElevationTile(const char* filepath) {
     }
     ElevationTile(x, y, filepath);
 }
-/*
-ElevationTile::ElevationTile(int _x, int _y) : x(_x), y(_y),
-    elevation((MAX_TILE_SIZE * MAX_TILE_SIZE) * sizeof(int16_t)) {
-}
-*/
 ElevationTile::ElevationTile() = default;
 ElevationTile::~ElevationTile() {
     if (munmap(map, file_stat.st_size) == -1)
