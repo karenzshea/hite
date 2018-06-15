@@ -51,8 +51,35 @@ namespace hite
         }
         return MAX_ELEVATION;
     }
+    TileIndex::TileIndex() = default;
+    TileIndex::TileIndex(const char* file)
+    {
+        std::cout << "size of array" << sizeof(ElevationTile) * TILE_INDEX_SIZE << std::endl;
+        std::cout << "Reading 1 path..." << std::endl;
+        std::uint8_t x,y;
+
+        // TODO pull name parsing into lambda
+        std::regex re{"^.+([0-9]{2}).+([0-9]{3})\\.hgt"};
+        std::cmatch out;
+        if (std::regex_match(file, out, re))
+        {
+            if (out.size() != 3) throw std::runtime_error("Could not parse file name");
+
+            x = std::stoi(out[1]);
+            y = std::stoi(out[2]);
+        }
+        else
+        {
+            throw std::runtime_error("Could not parse file name");
+        }
+
+        Coordinate file_coord = parseCoordFromName(file);
+        int coord_index = normalizeCoordToIndex(file_coord);
+        tiles[coord_index] = ElevationTile(x, y, file);
+    }
     TileIndex::TileIndex(const char* dirpath, const std::vector<const char*> &files)
     {
+        std::cout << "Reading " << files.size() << " path(s)..." << std::endl;
         std::uint8_t x,y;
         std::size_t i = 0;
         for (; i < files.size(); i++)
@@ -78,7 +105,7 @@ namespace hite
 
             Coordinate file_coord = parseCoordFromName(files[i]);
             int coord_index = normalizeCoordToIndex(file_coord);
-            tiles[coord_index] = ElevationTile(x, y, fullpath);
+            tiles.at(coord_index) = ElevationTile(x, y, fullpath);
         }
     }
     void readFileDir(const char* dirpath, std::vector<const char*> &files)

@@ -84,6 +84,7 @@ ElevationTile::ElevationTile(const char* filepath) {
 }
 ElevationTile::ElevationTile() = default;
 ElevationTile::~ElevationTile() {
+    // TODO write a method for file closing as part of index interface
     if (munmap(map, file_stat.st_size) == -1)
     {
         close(fd);
