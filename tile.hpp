@@ -17,6 +17,7 @@ extern "C" {
 #include <stdlib.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <errno.h>
 };
 
 #include "constants.hpp"
@@ -64,9 +65,7 @@ struct PixelCoordinate {
 TileCoordinate GetTileCoordinate(const Coordinate &coord);
 
 struct ElevationTile {
-    ElevationTile(int _x, int _y, const char* filepath);
-    ElevationTile(const char* filepath);
-    ElevationTile(int _x, int _y);
+    ElevationTile(int _x, int _y, const std::string &filepath);
     ElevationTile();
     ~ElevationTile();
     // methods

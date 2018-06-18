@@ -14,10 +14,10 @@ extern "C" {
 namespace hite
 {
     // Q should this use an int based Coordinate type?
-    Coordinate TileIndex::parseCoordFromName(const char* fileName)
+    Coordinate TileIndex::parseCoordFromName(std::string fileName)
     {
         std::regex re{"^([NWSE]{1})([0-9]{2})([NWSE]{1})([0-9]{3})\\.hgt"};
-        std::cmatch out;
+        std::smatch out;
         int x,y;
         Coordinate parsed;
         if (std::regex_match(fileName, out, re))
@@ -52,64 +52,32 @@ namespace hite
         return MAX_ELEVATION;
     }
     TileIndex::TileIndex() = default;
-    TileIndex::TileIndex(const char* file)
-    {
-        std::cout << "size of array" << sizeof(ElevationTile) * TILE_INDEX_SIZE << std::endl;
-        std::cout << "Reading 1 path..." << std::endl;
-        std::uint8_t x,y;
-
-        // TODO pull name parsing into lambda
-        std::regex re{"^.+([0-9]{2}).+([0-9]{3})\\.hgt"};
-        std::cmatch out;
-        if (std::regex_match(file, out, re))
-        {
-            if (out.size() != 3) throw std::runtime_error("Could not parse file name");
-
-            x = std::stoi(out[1]);
-            y = std::stoi(out[2]);
-        }
-        else
-        {
-            throw std::runtime_error("Could not parse file name");
-        }
-
-        Coordinate file_coord = parseCoordFromName(file);
-        int coord_index = normalizeCoordToIndex(file_coord);
-        tiles[coord_index] = ElevationTile(x, y, file);
-    }
-    TileIndex::TileIndex(const char* dirpath, const std::vector<const char*> &files)
+    TileIndex::TileIndex(const std::vector<std::string>& files)
     {
         std::cout << "Reading " << files.size() << " path(s)..." << std::endl;
         std::uint8_t x,y;
         std::size_t i = 0;
         for (; i < files.size(); i++)
         {
+            // TODO parse this earlier on in readFileDir?
             std::regex re{"^.+([0-9]{2}).+([0-9]{3})\\.hgt"};
-            std::cmatch out;
-            if (std::regex_match(files[i], out, re))
-            {
-                if (out.size() != 3) throw std::runtime_error("Could not parse file name");
+            std::smatch out;
+            if (!std::regex_match(files[i], out, re)) continue;
 
-                x = std::stoi(out[1]);
-                y = std::stoi(out[2]);
-            }
-            else
-            {
-                throw std::runtime_error("Could not parse file name");
-            }
-            // full path of file
-            char fullpath[strlen(dirpath) + 1 + strlen(files[i])];
-            strcpy(fullpath, dirpath);
-            strcat(fullpath, "/");
-            strcat(fullpath, files[i]);
+            if (out.size() != 3) continue;
+
+            x = std::stoi(out[1]);
+            y = std::stoi(out[2]);
 
             Coordinate file_coord = parseCoordFromName(files[i]);
             int coord_index = normalizeCoordToIndex(file_coord);
-            tiles.at(coord_index) = ElevationTile(x, y, fullpath);
+            tiles.at(coord_index) = ElevationTile(x, y, files[i]);
         }
+        std::cout << tiles.size() << std::endl;
     }
-    void readFileDir(const char* dirpath, std::vector<const char*> &files)
+    void readFileDir(const char* dirpath, std::vector<std::string>& files)
     {
+        std::string directory(dirpath);
         // save filenames of all .hgt files in a given directory
         DIR* dir_stream = dir_stream = opendir(dirpath);
         struct dirent *dirp;
@@ -120,10 +88,9 @@ namespace hite
         std::regex re{".*+\\.hgt"};
         while ((dirp = readdir(dir_stream)) != NULL)
         {
-            std::cout << std::string(dirp->d_name) << std::endl;
             if (std::regex_match(dirp->d_name, re))
             {
-                files.push_back(dirp->d_name);
+                files.push_back(directory + "/" + std::string(dirp->d_name));
             }
         }
     }

@@ -17,6 +17,7 @@ extern "C" {
 #include "tile_index.hpp"
 #include "tile.hpp"
 
+// todo better error handling?
 int main(const int argc, const char* argv[]) {
     // Expecting file like 'N52E013.hgt'
     if (argc < 2) throw std::runtime_error("Missing argument file or path to files");
@@ -27,17 +28,21 @@ int main(const int argc, const char* argv[]) {
         throw std::runtime_error("Could not stat file or file path");
     }
 
+    std::vector<std::string> files;
     // handle either a single file or a path to a directory
     if ((path_stat.st_mode & S_IFMT) == S_IFREG)
     {
-        hite::TileIndex tile_index(path);
+        files.push_back(path);
     }
     else if ((path_stat.st_mode & S_IFMT) == S_IFDIR)
     {
-        std::vector<const char*> files;
         hite::readFileDir(path, files);
-        hite::TileIndex tile_index(path, files);
+        if (files.empty())
+        {
+            throw std::runtime_error("No files found in given path!");
+        }
     }
+    hite::TileIndex tile_index(files);
     /*
 
     hite::Coordinate top_of_hill(13.414049, 52.550679);

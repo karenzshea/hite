@@ -1,4 +1,5 @@
 #include <cmath>
+#include <string.h>
 
 #include "./tile.hpp"
 
@@ -17,6 +18,7 @@ Elevation ElevationTile::GetPixelData(const PixelCoordinate &pixel_coord)
 {
     auto lower_idx = 2 * ((pixel_coord.Y * MAX_TILE_SIZE) + pixel_coord.X);
     auto upper_idx = lower_idx + 1;
+    // TODO look into operator precedence
     int16_t swapped = static_cast<int16_t>(map[lower_idx]) << 8 | static_cast<int16_t>(map[upper_idx]);
     return swapped;
 }
@@ -44,9 +46,9 @@ Elevation ElevationTile::GetElevation(const Coordinate &coord)
     return elevation;
 }
 
-ElevationTile::ElevationTile(int _x, int _y, const char* filepath) : x(_x), y(_y) {
+ElevationTile::ElevationTile(int _x, int _y, const std::string &filepath) : x(_x), y(_y) {
     // mmap tile file
-    fd = open(filepath, O_RDWR, (mode_t)0222);
+    fd = open(filepath.c_str(), O_RDWR, (mode_t)0222);
     if (fd == -1)
     {
         throw std::runtime_error("Couldn't open hgt file!");
@@ -66,29 +68,13 @@ ElevationTile::ElevationTile(int _x, int _y, const char* filepath) : x(_x), y(_y
         throw std::runtime_error("Error mmapping file!");
     }
 }
-ElevationTile::ElevationTile(const char* filepath) {
-    std::regex re{"^.+([0-9]{2}).+([0-9]{3})\\.hgt"};
-    std::cmatch out;
-    if (std::regex_match(filepath, out, re))
-    {
-        if (out.size() != 3) throw std::runtime_error("Could not parse file name");
-
-        x = std::stoi(out[1]);
-        y = std::stoi(out[2]);
-    }
-    else
-    {
-        throw std::runtime_error("Could not parse file name");
-    }
-    ElevationTile(x, y, filepath);
-}
 ElevationTile::ElevationTile() = default;
 ElevationTile::~ElevationTile() {
-    // TODO write a method for file closing as part of index interface
+    if (map == nullptr) return;
     if (munmap(map, file_stat.st_size) == -1)
     {
-        close(fd);
+        std::cerr << "munmap failed with " << ::strerror(errno) << std::endl;
     }
-    close(fd);
+    ::close(fd);
 };
 }
