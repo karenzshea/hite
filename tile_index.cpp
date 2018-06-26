@@ -13,72 +13,70 @@ extern "C" {
 
 namespace hite
 {
-    // Q should this use an int based Coordinate type?
-    Coordinate TileIndex::parseCoordFromName(std::string fileName)
+    IntCoordinate TileIndex::parseCoordFromName(std::string fileName)
     {
-        std::regex re{"^([NWSE]{1})([0-9]{2})([NWSE]{1})([0-9]{3})\\.hgt"};
+        // N52E013.hgt => {Lon: 13, Lat: 52}
+        std::regex re{".?([NWSE]{1})([0-9]{2})([NWSE]{1})([0-9]{3})\\.hgt"};
         std::smatch out;
-        int x,y;
-        Coordinate parsed;
+        IntCoordinate parsed;
         if (std::regex_match(fileName, out, re))
         {
-            x = out[1] == 'N' ? std::stoi(out[2]) : std::stoi(out[2]) * -1;
-            y = out[3] == 'W' ? std::stoi(out[4]) : std::stoi(out[4]) * -1;
+            int y = out[1] == 'N' ? std::stoi(out[2]) : std::stoi(out[2]) * -1;
+            int x = out[3] == 'E' ? std::stoi(out[4]) : std::stoi(out[4]) * -1;
             parsed.Longitude = x;
             parsed.Latitude = y;
         }
+        else
+        {
+        }
         return parsed;
     }
-    int TileIndex::normalizeCoordToIndex(const Coordinate &coordinate)
+    int TileIndex::normalizeCoordToIndex(const IntCoordinate &coordinate)
     {
+        // {Lon: 13, Lat: 52} => 193 * 142 => 27406
         int offset_x = coordinate.Longitude + 180;
         int offset_y = coordinate.Latitude + 90;
         return offset_x * offset_y;
     }
     bool TileIndex::IsValidTile(const int index)
     {
-        return tiles[index].map != nullptr;
+        return (bool)tiles[index].mm.map;
     }
     Elevation TileIndex::Lookup(const Coordinate &coordinate)
     {
-        // identify tile index of coordinate
-        // check that tile at tile index is valid
-        // call getElevation on tile
-        auto index = normalizeCoordToIndex(coordinate);
+        //TileCoordinate tile_coord = GetTileCoordinate(coordinate);
+        auto index = normalizeCoordToIndex(IntCoordinate{coordinate.Longitude, coordinate.Latitude});
+        std::cout << "tile index: " << index << std::endl;
         if (IsValidTile(index))
         {
             return tiles[index].GetElevation(coordinate);
         }
+        std::cout << "no valid tile found" << std::endl;
         return MAX_ELEVATION;
     }
     TileIndex::TileIndex() = default;
     TileIndex::TileIndex(const std::vector<std::string>& files)
     {
         std::cout << "Reading " << files.size() << " path(s)..." << std::endl;
-        std::uint8_t x,y;
         std::size_t i = 0;
         for (; i < files.size(); i++)
         {
-            // TODO parse this earlier on in readFileDir?
-            std::regex re{"^.+([0-9]{2}).+([0-9]{3})\\.hgt"};
-            std::smatch out;
-            if (!std::regex_match(files[i], out, re)) continue;
-
-            if (out.size() != 3) continue;
-
-            x = std::stoi(out[1]);
-            y = std::stoi(out[2]);
-
-            Coordinate file_coord = parseCoordFromName(files[i]);
+            IntCoordinate file_coord = parseCoordFromName(files[i]);
+            if (file_coord.Longitude == MAX_INT || file_coord.Latitude == MAX_INT)
+            {
+                std::cout << "Unable to parse file name: " << files[i] << std::endl;
+                continue;
+            }
             int coord_index = normalizeCoordToIndex(file_coord);
-            tiles.at(coord_index) = ElevationTile(x, y, files[i]);
+            tiles.at(coord_index) = ElevationTile(file_coord.Longitude, file_coord.Latitude, files[i]);
+            std::cout << "wrote tile at: " << coord_index << std::endl;
         }
-        std::cout << tiles.size() << std::endl;
     }
     void readFileDir(const char* dirpath, std::vector<std::string>& files)
     {
-        std::string directory(dirpath);
         // save filenames of all .hgt files in a given directory
+        std::string directory(dirpath);
+        // TODO check that this is valid path
         DIR* dir_stream = dir_stream = opendir(dirpath);
         struct dirent *dirp;
         if (dir_stream == NULL)

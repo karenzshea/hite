@@ -13,8 +13,8 @@ namespace hite
         bool IsValidTile(const int index);
 
         private:
-        Coordinate parseCoordFromName(std::string fileName);
-        int normalizeCoordToIndex(const Coordinate &coordinate);
+        IntCoordinate parseCoordFromName(std::string fileName);
+        int normalizeCoordToIndex(const IntCoordinate &coordinate);
 
         std::vector<ElevationTile> tiles{TILE_INDEX_SIZE};
     };

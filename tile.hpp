@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <regex>
 #include <string>
+#include <memory>
 extern "C" {
 #include <sys/stat.h>
 #include <sys/mman.h>
@@ -21,9 +22,39 @@ extern "C" {
 };
 
 #include "constants.hpp"
+#include "mem_mapper.hpp"
 
 namespace hite
 {
+
+struct IntCoordinate {
+    IntCoordinate() = default;
+    IntCoordinate(double Lon, double Lat)
+    {
+        // is it OK to implicitly narrow double -> int?
+        if (Lon < 180.0 && Lon > -180.0)
+        {
+            Longitude = Lon;
+        }
+        if (Lat < 90.0 && Lat > -90.0)
+        {
+            Latitude = Lat;
+        }
+    }
+    IntCoordinate(int Lon, int Lat)
+    {
+        if (Lon < 180 && Lon > -180)
+        {
+            Longitude = Lon;
+        }
+        if (Lat < 90 && Lat > -90)
+        {
+            Latitude = Lat;
+        }
+    }
+    int Longitude = MAX_INT;
+    int Latitude = MAX_INT;
+};
 
 struct Coordinate {
     Coordinate() = default;
@@ -65,9 +96,14 @@ struct PixelCoordinate {
 TileCoordinate GetTileCoordinate(const Coordinate &coord);
 
 struct ElevationTile {
+    ElevationTile& operator=(ElevationTile&&) = default;
+    ElevationTile(ElevationTile&&) = default;
     ElevationTile(int _x, int _y, const std::string &filepath);
     ElevationTile();
     ~ElevationTile();
+    ElevationTile& operator=(const ElevationTile&) = delete;
+    ElevationTile(const ElevationTile&) = delete;
+
     // methods
     Elevation GetElevation(const Coordinate &coord);
     Elevation GetInterpolatedData(const TileCoordinate &tile_coord);
@@ -77,14 +113,13 @@ struct ElevationTile {
     // Q what are these for?
     int x = MAX_INT;
     int y = MAX_INT;
-    char *map = nullptr;
-    // Q how to define default value for struct stat?
-    struct stat file_stat;
+    MemMap mm;
 
     private:
     bool InsideTile(const Coordinate &coordinate);
     int fd;
 };
+
 }
 
 #endif
