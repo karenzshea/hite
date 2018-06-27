@@ -21,8 +21,7 @@ Elevation ElevationTile::GetPixelData(const PixelCoordinate &pixel_coord)
     auto upper_idx = lower_idx + 1;
     if (mm.map)
     {
-        // TODO look into operator precedence
-        int16_t swapped = static_cast<int16_t>(mm.map[lower_idx]) << 8 | static_cast<int16_t>(mm.map[upper_idx]);
+        int16_t swapped = (static_cast<int16_t>(mm.map[lower_idx]) << 8) | static_cast<int16_t>(mm.map[upper_idx]);
         return swapped;
     }
     return MAX_ELEVATION;

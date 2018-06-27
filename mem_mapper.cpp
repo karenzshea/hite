@@ -38,7 +38,7 @@ MemMap::~MemMap() {
 }
 
 // move functions
-MemMap::MemMap(MemMap&& other) : map(other.map) {
+MemMap::MemMap(MemMap&& other) : map{other.map} {
     // how does self-assignment get handled here?
     other.map = nullptr;
 }
