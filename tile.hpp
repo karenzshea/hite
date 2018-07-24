@@ -105,19 +105,18 @@ struct ElevationTile {
     ElevationTile(const ElevationTile&) = delete;
 
     // methods
-    Elevation GetElevation(const Coordinate &coord);
-    Elevation GetInterpolatedData(const Coordinate &coord);
     Elevation GetPixelData(const PixelCoordinate &pixel_coord);
+    bool isValid();
 
     // members
     // Q what are these for?
     int x = MAX_INT;
     int y = MAX_INT;
-    MemMap mm;
 
     private:
     bool InsideTile(const Coordinate &coordinate);
     int fd;
+    MemMap mm;
 };
 
 }

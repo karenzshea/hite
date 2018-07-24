@@ -13,40 +13,18 @@ extern "C" {
 
 namespace hite
 {
-    IntCoordinate TileIndex::parseCoordFromName(std::string fileName)
-    {
-        // N52E013.hgt => {Lon: 13, Lat: 52}
-        std::regex re{".?([NWSE]{1})([0-9]{2})([NWSE]{1})([0-9]{3})\\.hgt"};
-        std::smatch out;
-        IntCoordinate parsed;
-        if (std::regex_match(fileName, out, re))
-        {
-            int y = out[1] == 'N' ? std::stoi(out[2]) : std::stoi(out[2]) * -1;
-            int x = out[3] == 'E' ? std::stoi(out[4]) : std::stoi(out[4]) * -1;
-            parsed.Longitude = x;
-            parsed.Latitude = y;
-        }
-        else
-        {
-        }
-        return parsed;
-    }
-    bool TileIndex::IsValidTile(const int index)
-    {
-        return (bool)tiles[index].mm.map;
-    }
     Elevation TileIndex::Lookup(const Coordinate &coordinate)
     {
         auto index = normalizeCoordToIndex(IntCoordinate{coordinate.Longitude, coordinate.Latitude});
         std::cout << "tile index: " << index << std::endl;
-        if (IsValidTile(index))
+        if (tiles[index].isValid())
         {
-            return tiles[index].GetElevation(coordinate);
+            return calculateElevation(coordinate);
         }
         std::cout << "no valid tile found" << std::endl;
         return MAX_ELEVATION;
     }
-    ElevationTile& TileIndex::GetTile(const int index)
+    ElevationTile& TileIndex::getTile(const int index)
     {
         return tiles[index];
     }
@@ -67,6 +45,47 @@ namespace hite
             tiles.at(coord_index) = ElevationTile(file_coord.Longitude, file_coord.Latitude, files[i]);
             std::cout << "wrote tile at: " << coord_index << std::endl;
         }
+    }
+    IntCoordinate TileIndex::parseCoordFromName(std::string fileName)
+    {
+        // N52E013.hgt => {Lon: 13, Lat: 52}
+        std::regex re{".?([NWSE]{1})([0-9]{2})([NWSE]{1})([0-9]{3})\\.hgt"};
+        std::smatch out;
+        IntCoordinate parsed;
+        if (std::regex_match(fileName, out, re))
+        {
+            int y = out[1] == 'N' ? std::stoi(out[2]) : std::stoi(out[2]) * -1;
+            int x = out[3] == 'E' ? std::stoi(out[4]) : std::stoi(out[4]) * -1;
+            parsed.Longitude = x;
+            parsed.Latitude = y;
+        }
+        else
+        {
+        }
+        return parsed;
+    }
+    Elevation TileIndex::calculateElevation(const Coordinate &coordinate)
+    {
+        auto index = normalizeCoordToIndex(IntCoordinate{coordinate.Longitude, coordinate.Latitude});
+        ElevationTile& tile = getTile(index);
+        TileCoordinate coord_decimal = GetTileCoordinate(coordinate);
+        Elevation q11, q21, q12, q22;
+        int x1 = std::floor(coord_decimal.U * MAX_TILE_SIZE);
+        int y1 = MAX_TILE_SIZE - std::floor(coord_decimal.V * MAX_TILE_SIZE);
+        int x2 = x1 + 1;
+        int y2 = y1 + 1;
+
+        q12 = tile.GetPixelData({x1, y2});
+        q22 = tile.GetPixelData({x2, y2});
+        q11 = tile.GetPixelData({x1, y1});
+        q21 = tile.GetPixelData({x2, y1});
+        double normalizedU = coord_decimal.U * MAX_TILE_SIZE;
+        double normalizedV = MAX_TILE_SIZE - (coord_decimal.V * MAX_TILE_SIZE);
+
+        double r1 = (((double)x2 - normalizedU) * q11) + ((normalizedU - (double)x1) * q21);
+        double r2 = (((double)x2 - normalizedU) * q12) + ((normalizedU - (double)x1) * q22);
+        double elevation = (((double)y2 - normalizedV)) * r1 + ((normalizedV - (double)y1) * r2);
+        return elevation;
     }
     int normalizeCoordToIndex(const IntCoordinate &coordinate)
     {

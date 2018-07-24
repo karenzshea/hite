@@ -11,11 +11,11 @@ struct TileIndex {
     TileIndex();
     TileIndex(const std::vector<std::string> &files);
     Elevation Lookup(const Coordinate &coordinate);
-    ElevationTile& GetTile(const int index);
-    bool IsValidTile(const int index);
+    ElevationTile& getTile(const int index);
 
     private:
     IntCoordinate parseCoordFromName(std::string fileName);
+    Elevation calculateElevation(const Coordinate &coordinate);
 
     std::vector<ElevationTile> tiles{TILE_INDEX_SIZE};
 };

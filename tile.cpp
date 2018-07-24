@@ -27,38 +27,15 @@ Elevation ElevationTile::GetPixelData(const PixelCoordinate &pixel_coord)
     return MAX_ELEVATION;
 }
 
-Elevation ElevationTile::GetInterpolatedData(const Coordinate &coord)
-{
-    TileCoordinate coord_decimal = GetTileCoordinate(coord);
-    Elevation q11, q21, q12, q22;
-    int x1 = std::floor(coord_decimal.U * MAX_TILE_SIZE); // this can never be more than max tile size?
-    int x2 = x1 + 1;
-    int y1 = MAX_TILE_SIZE - std::floor(coord_decimal.V * MAX_TILE_SIZE);
-    int y2 = y1 + 1;
-
-    q12 = GetPixelData({x1, y2});
-    q22 = GetPixelData({x2, y2});
-    q11 = GetPixelData({x1, y1});
-    q21 = GetPixelData({x2, y1});
-    double normalizedU = coord_decimal.U * MAX_TILE_SIZE;
-    double normalizedV = MAX_TILE_SIZE - (coord_decimal.V * MAX_TILE_SIZE);
-
-    double r1 = (((double)x2 - normalizedU) * q11) + ((normalizedU - (double)x1) * q21);
-    double r2 = (((double)x2 - normalizedU) * q12) + ((normalizedU - (double)x1) * q22);
-    double elevation = (((double)y2 - normalizedV)) * r1 + ((normalizedV - (double)y1) * r2);
-    return elevation;
-}
-
 bool ElevationTile::InsideTile(const Coordinate &coord)
 {
     TileCoordinate tc = GetTileCoordinate(coord);
     return tc.U == x && tc.V == y;
 }
 
-Elevation ElevationTile::GetElevation(const Coordinate &coord)
+bool ElevationTile::isValid()
 {
-    Elevation elevation = GetInterpolatedData(coord);
-    return elevation;
+    return (bool)mm.map;
 }
 
 ElevationTile::ElevationTile(int _x, int _y, const std::string &filepath)
