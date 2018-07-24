@@ -31,20 +31,12 @@ namespace hite
         }
         return parsed;
     }
-    int TileIndex::normalizeCoordToIndex(const IntCoordinate &coordinate)
-    {
-        // {Lon: 13, Lat: 52} => 193 * 142 => 27406
-        int offset_x = coordinate.Longitude + 180;
-        int offset_y = coordinate.Latitude + 90;
-        return offset_x * offset_y;
-    }
     bool TileIndex::IsValidTile(const int index)
     {
         return (bool)tiles[index].mm.map;
     }
     Elevation TileIndex::Lookup(const Coordinate &coordinate)
     {
-        //TileCoordinate tile_coord = GetTileCoordinate(coordinate);
         auto index = normalizeCoordToIndex(IntCoordinate{coordinate.Longitude, coordinate.Latitude});
         std::cout << "tile index: " << index << std::endl;
         if (IsValidTile(index))
@@ -53,6 +45,10 @@ namespace hite
         }
         std::cout << "no valid tile found" << std::endl;
         return MAX_ELEVATION;
+    }
+    ElevationTile& TileIndex::GetTile(const int index)
+    {
+        return tiles[index];
     }
     TileIndex::TileIndex() = default;
     TileIndex::TileIndex(const std::vector<std::string>& files)
@@ -71,6 +67,13 @@ namespace hite
             tiles.at(coord_index) = ElevationTile(file_coord.Longitude, file_coord.Latitude, files[i]);
             std::cout << "wrote tile at: " << coord_index << std::endl;
         }
+    }
+    int normalizeCoordToIndex(const IntCoordinate &coordinate)
+    {
+        // e.g. {Lon: 13, Lat: 52} => 193 * 142 => 27406
+        int offset_x = coordinate.Longitude + 180;
+        int offset_y = coordinate.Latitude + 90;
+        return offset_x * offset_y;
     }
     void readFileDir(const char* dirpath, std::vector<std::string>& files)
     {

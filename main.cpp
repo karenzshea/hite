@@ -44,10 +44,20 @@ int main(const int argc, const char* argv[]) {
     }
     hite::TileIndex tile_index(files);
 
+    double x, y;
+    std::cout << "longitude:" << std::endl;
+    std::cin >> x;
+    std::cout << "latitude:" << std::endl;
+    std::cin >> y;
+    hite::Coordinate a(x, y);
+    hite::Elevation a_elev = tile_index.Lookup(a);
+    std::cout << a_elev << std::endl;
+    /*
     hite::Coordinate top_of_hill(13.414049, 52.550679);
     hite::Elevation top = tile_index.Lookup(top_of_hill);
     hite::Coordinate bottom_of_hill(13.409757, 52.528493);
     hite::Elevation bottom = tile_index.Lookup(bottom_of_hill);
     std::cout << top << std::endl;
     std::cout << bottom << std::endl;
+    */
 }

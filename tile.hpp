@@ -106,7 +106,7 @@ struct ElevationTile {
 
     // methods
     Elevation GetElevation(const Coordinate &coord);
-    Elevation GetInterpolatedData(const TileCoordinate &tile_coord);
+    Elevation GetInterpolatedData(const Coordinate &coord);
     Elevation GetPixelData(const PixelCoordinate &pixel_coord);
 
     // members
