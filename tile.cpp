@@ -5,6 +5,10 @@
 
 namespace hite
 {
+bool IntCoordinate::IsValid()
+{
+    return Longitude != MAX_INT && Latitude != MAX_INT;
+}
 // TODO this needs a better name
 TileCoordinate GetTileCoordinate(const Coordinate &coord)
 {

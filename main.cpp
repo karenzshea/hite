@@ -21,12 +21,12 @@ extern "C" {
 int main(const int argc, const char* argv[]) {
     // Expecting file like 'N52E013.hgt'
     if (argc < 2) throw std::runtime_error("Missing argument file or path to files");
-    const char* path = argv[1];
     struct stat path_stat;
-    if (stat(path, &path_stat) == -1)
+    if (stat(argv[1], &path_stat) == -1)
     {
         throw std::runtime_error("Could not stat file or file path");
     }
+    const char* path = argv[1];
 
     std::vector<std::string> files;
     // handle either a single file or a path to a directory

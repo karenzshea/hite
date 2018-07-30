@@ -36,7 +36,7 @@ namespace hite
         for (; i < files.size(); i++)
         {
             IntCoordinate file_coord = parseCoordFromName(files[i]);
-            if (file_coord.Longitude == MAX_INT || file_coord.Latitude == MAX_INT)
+            if (file_coord.IsValid())
             {
                 std::cout << "Unable to parse file name: " << files[i] << std::endl;
                 continue;
@@ -49,7 +49,7 @@ namespace hite
     IntCoordinate TileIndex::parseCoordFromName(std::string fileName)
     {
         // N52E013.hgt => {Lon: 13, Lat: 52}
-        std::regex re{".?([NWSE]{1})([0-9]{2})([NWSE]{1})([0-9]{3})\\.hgt"};
+        std::regex re{".+\\/?([NWSE]{1})([0-9]{2})([NWSE]{1})([0-9]{3})\\.hgt"};
         std::smatch out;
         IntCoordinate parsed;
         if (std::regex_match(fileName, out, re))
@@ -59,9 +59,6 @@ namespace hite
             parsed.Longitude = x;
             parsed.Latitude = y;
         }
-        else
-        {
-        }
         return parsed;
     }
     Elevation TileIndex::calculateElevation(const Coordinate &coordinate)
@@ -70,6 +67,7 @@ namespace hite
         ElevationTile& tile = getTile(index);
         TileCoordinate coord_decimal = GetTileCoordinate(coordinate);
         Elevation q11, q21, q12, q22;
+        // TODO edge cases when x2/y2 are > max_tile_size?
         int x1 = std::floor(coord_decimal.U * MAX_TILE_SIZE);
         int y1 = MAX_TILE_SIZE - std::floor(coord_decimal.V * MAX_TILE_SIZE);
         int x2 = x1 + 1;

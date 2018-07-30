@@ -54,6 +54,8 @@ struct IntCoordinate {
     }
     int Longitude = MAX_INT;
     int Latitude = MAX_INT;
+
+    bool IsValid();
 };
 
 struct Coordinate {
