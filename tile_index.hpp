@@ -14,11 +14,11 @@ struct TileIndex {
     ElevationTile& getTile(const int index);
 
     private:
-    IntCoordinate parseCoordFromName(std::string fileName);
     Elevation calculateElevation(const Coordinate &coordinate);
 
     std::vector<ElevationTile> tiles{TILE_INDEX_SIZE};
 };
 int normalizeCoordToIndex(const IntCoordinate &coordinate);
 void readFileDir(const char* dirpath, std::vector<std::string> &files);
+IntCoordinate parseCoordFromName(std::string fileName);
 }

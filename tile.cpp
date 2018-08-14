@@ -9,13 +9,12 @@ bool IntCoordinate::IsValid()
 {
     return Longitude != MAX_INT && Latitude != MAX_INT;
 }
-// TODO this needs a better name
-TileCoordinate GetTileCoordinate(const Coordinate &coord)
+CoordinateDecimal GetCoordinateDecimal(const Coordinate &coord)
 {
-    TileCoordinate tc{std::abs(coord.Longitude), std::abs(coord.Latitude)};
-    tc.U = tc.U - std::floor(tc.U);
-    tc.V = tc.V - std::floor(tc.V);
-    return tc;
+    CoordinateDecimal cd{std::abs(coord.Longitude), std::abs(coord.Latitude)};
+    cd.U = cd.U - std::floor(cd.U);
+    cd.V = cd.V - std::floor(cd.V);
+    return cd;
 }
 
 // ElevationTile
@@ -33,8 +32,8 @@ Elevation ElevationTile::GetPixelData(const PixelCoordinate &pixel_coord)
 
 bool ElevationTile::InsideTile(const Coordinate &coord)
 {
-    TileCoordinate tc = GetTileCoordinate(coord);
-    return tc.U == x && tc.V == y;
+    CoordinateDecimal cd = GetCoordinateDecimal(coord);
+    return cd.U == x && cd.V == y;
 }
 
 bool ElevationTile::isValid()

@@ -13,6 +13,21 @@ extern "C" {
 
 namespace hite
 {
+    IntCoordinate parseCoordFromName(std::string fileName)
+    {
+        // N52E013.hgt => {Lon: 13, Lat: 52}
+        std::regex re{".+\\/?([NWSE]{1})([0-9]{2})([NWSE]{1})([0-9]{3})\\.hgt"};
+        std::smatch out;
+        IntCoordinate parsed;
+        if (std::regex_match(fileName, out, re))
+        {
+            int y = out[1] == 'N' ? std::stoi(out[2]) : std::stoi(out[2]) * -1;
+            int x = out[3] == 'E' ? std::stoi(out[4]) : std::stoi(out[4]) * -1;
+            parsed.Longitude = x;
+            parsed.Latitude = y;
+        }
+        return parsed;
+    }
     Elevation TileIndex::Lookup(const Coordinate &coordinate)
     {
         auto index = normalizeCoordToIndex(IntCoordinate{coordinate.Longitude, coordinate.Latitude});
@@ -46,26 +61,11 @@ namespace hite
             std::cout << "wrote tile at: " << coord_index << std::endl;
         }
     }
-    IntCoordinate TileIndex::parseCoordFromName(std::string fileName)
-    {
-        // N52E013.hgt => {Lon: 13, Lat: 52}
-        std::regex re{".+\\/?([NWSE]{1})([0-9]{2})([NWSE]{1})([0-9]{3})\\.hgt"};
-        std::smatch out;
-        IntCoordinate parsed;
-        if (std::regex_match(fileName, out, re))
-        {
-            int y = out[1] == 'N' ? std::stoi(out[2]) : std::stoi(out[2]) * -1;
-            int x = out[3] == 'E' ? std::stoi(out[4]) : std::stoi(out[4]) * -1;
-            parsed.Longitude = x;
-            parsed.Latitude = y;
-        }
-        return parsed;
-    }
     Elevation TileIndex::calculateElevation(const Coordinate &coordinate)
     {
         auto index = normalizeCoordToIndex(IntCoordinate{coordinate.Longitude, coordinate.Latitude});
         ElevationTile& tile = getTile(index);
-        TileCoordinate coord_decimal = GetTileCoordinate(coordinate);
+        CoordinateDecimal coord_decimal = GetCoordinateDecimal(coordinate);
         Elevation q11, q21, q12, q22;
         // TODO edge cases when x2/y2 are > max_tile_size?
         int x1 = std::floor(coord_decimal.U * MAX_TILE_SIZE);

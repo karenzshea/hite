@@ -76,11 +76,11 @@ struct Coordinate {
 };
 
 // e.g. 13.415852,52.485185 => 0.415852,0.485185
-struct TileCoordinate {
-    TileCoordinate() : U(MAX_DOUBLE), V(MAX_DOUBLE)
+struct CoordinateDecimal {
+    CoordinateDecimal() : U(MAX_DOUBLE), V(MAX_DOUBLE)
     {
     }
-    TileCoordinate(double u, double v)
+    CoordinateDecimal(double u, double v)
         : U(u), V(v) {
     }
     double U; // column
@@ -95,7 +95,7 @@ struct PixelCoordinate {
     int Y; // row
 };
 
-TileCoordinate GetTileCoordinate(const Coordinate &coord);
+CoordinateDecimal GetCoordinateDecimal(const Coordinate &coord);
 
 struct ElevationTile {
     ElevationTile& operator=(ElevationTile&&) = default;

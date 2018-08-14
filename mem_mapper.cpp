@@ -41,6 +41,7 @@ MemMap::~MemMap() {
 MemMap::MemMap(MemMap&& other) : map{other.map} {
     // how does self-assignment get handled here?
     other.map = nullptr;
+    file_stat = std::move(other.file_stat);
 }
 MemMap& MemMap::operator=(MemMap&& other) {
     // is there a better way to avoid self assignment?
