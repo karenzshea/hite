@@ -9,6 +9,8 @@ bool IntCoordinate::IsValid()
 {
     return Longitude != MAX_INT && Latitude != MAX_INT;
 }
+bool operator==(const CoordinateDecimal& lhs, const CoordinateDecimal& rhs) { return std::tie(lhs.U, lhs.V) == std::tie(rhs.U, rhs.V); }
+
 CoordinateDecimal GetCoordinateDecimal(const Coordinate &coord)
 {
     CoordinateDecimal cd{std::abs(coord.Longitude), std::abs(coord.Latitude)};

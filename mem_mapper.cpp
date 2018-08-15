@@ -12,8 +12,9 @@ MemMap::MemMap(const std::string &filepath) {
     {
         throw std::runtime_error("Couldn't get size of hgt file!");
     }
-    if (file_stat.st_size == 0 || file_stat.st_size != HGT_FILE_SIZE)
+    if (file_stat.st_size == 0) // || file_stat.st_size != HGT_FILE_SIZE)
     {
+        std::cout << "file size " << file_stat.st_size << std::endl;
         throw std::runtime_error("Hgt file is empty or the wrong size!");
     }
     map = static_cast<char *>(mmap(0, file_stat.st_size, PROT_READ, MAP_PRIVATE, fd, 0));

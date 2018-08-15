@@ -51,7 +51,7 @@ namespace hite
         for (; i < files.size(); i++)
         {
             IntCoordinate file_coord = parseCoordFromName(files[i]);
-            if (file_coord.IsValid())
+            if (!file_coord.IsValid())
             {
                 std::cout << "Unable to parse file name: " << files[i] << std::endl;
                 continue;

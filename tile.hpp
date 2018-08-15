@@ -87,6 +87,8 @@ struct CoordinateDecimal {
     double V; // row
 };
 
+bool operator==(const CoordinateDecimal& lhs, const CoordinateDecimal& rhs);
+
 struct PixelCoordinate {
     PixelCoordinate(int x, int y)
         : X(x), Y(y) {
