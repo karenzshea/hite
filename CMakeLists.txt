@@ -10,8 +10,22 @@ add_library(hite STATIC
    mem_mapper.cpp
 )
 
+add_library(catch2 STATIC
+    test/catch.config.cpp
+)
+
 add_executable(main
    main.cpp
 )
 
+add_executable(tile-test
+    test/tile.test.cpp
+)
+
+add_executable(tile-index-test
+    test/tile_index.test.cpp
+)
+
 target_link_libraries(main hite)
+target_link_libraries(tile-test catch2 hite)
+target_link_libraries(tile-index-test catch2 hite)
