@@ -1,17 +1,18 @@
 #include "../third_party/catch2/catch.hpp"
 #include "../tile.hpp"
 
+#include <iostream>
+
 TEST_CASE("coordinate to tile coordinate", "[ElevationTile]") {
     const hite::CoordinateDecimal expected{.20826721191406,.87127072947452};
     const hite::Coordinate input{151.20826721191406,-33.87127072947452};
     const auto gotten = GetCoordinateDecimal(input);
-    //CHECK(gotten == expected);
     CHECK(gotten.V == Approx(expected.V));
     CHECK(gotten.U == Approx(expected.U));
 }
 
 TEST_CASE("elevation tile construction", "[ElevationTile]") {
-    hite::ElevationTile et(52, 13, "./test/fixtures/N52E013.hgt");
+    hite::ElevationTile et(52, 13, "./test/data/N52E013.hgt");
     CHECK(et.isValid());
 
     hite::ElevationTile et2 = std::move(et);
@@ -24,7 +25,7 @@ TEST_CASE("elevation tile construction", "[ElevationTile]") {
 }
 
 TEST_CASE("elevation tile pixel data", "[ElevationTile]") {
-    hite::ElevationTile tile(52, 13, "./test/fixtures/N52E013.hgt");
+    hite::ElevationTile tile(52, 13, "./test/data/N52E013.hgt");
     // essentially a query for (13.5, 52.5)
     int x1 = std::floor(0.5 * hite::MAX_TILE_SIZE);
     int y1 = std::floor(0.5 * hite::MAX_TILE_SIZE);
