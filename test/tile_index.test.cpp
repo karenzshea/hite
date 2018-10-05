@@ -20,12 +20,23 @@ TEST_CASE("Parse int coordinate from name", "[TileIndex]") {
     CHECK(coord4.Longitude == 106);
     CHECK(coord4.Latitude == -6);
 }
-*/
 
 TEST_CASE("Generate tile index", "[TileIndex]") {
-    std::vector<std::string> files{"./test/data/N28W016.hgt", "./test/data/N52E013.hgt"};
+    std::vector<std::string> files{"./test/data/N27W016.hgt", "./test/data/N28W016.hgt", "./test/data/N52E013.hgt"};
     hite::TileIndex index(files);
-    hite::Elevation pico = index.Lookup({-16.64257049560547, 28.27229686425326});
+    // approximately mount teide on tenerife
+    // https://www.answers.com/Q/How_high_is_Mount_Teide
+    hite::Elevation pico = index.Lookup({-16.642575921786374,28.272692489729017});
+    hite::Elevation xyz = index.Lookup({-16.66763305664062, 28.261751308162367});
+    std::cout << "pico " << pico << std::endl;
     CHECK(pico >= 3710);
     CHECK(pico <= 3720);
+}
+*/
+TEST_CASE("Generate tile index", "[TileIndex]") {
+    std::vector<std::string> files{"./test/data/N45E007.hgt"};
+    hite::TileIndex index(files);
+    hite::Elevation xyz = index.Lookup({7.659044597979232,45.97652690664907});
+    std::cout << "xyz " << xyz << std::endl;
+    CHECK(xyz >= 4000);
 }

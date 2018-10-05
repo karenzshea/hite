@@ -22,6 +22,19 @@ CoordinateDecimal GetCoordinateDecimal(const Coordinate &coord)
 // ElevationTile
 Elevation ElevationTile::GetPixelData(const PixelCoordinate &pixel_coord)
 {
+    // bytes need to be swapped because of data format. From documentation:
+    //    "The DEM is provided as 16-bit signed integer data in a simple binary
+    //    raster. There are no header or trailer bytes embedded in the file. The data
+    //    are stored in row major order (all the data for row 1, followed by all the
+    //    data for row 2, etc.).
+    //
+    //    All elevations are in meters referenced to the WGS84 EGM96 geoid as
+    //    documented at http://www.nima.mil/GandG/wgsegm/.
+    //
+    //    Byte order is Motorola ("big-endian") standard with the most significant
+    //    byte first. Since they are signed integers elevations can range from -32767
+    //    to 32767 meters, encompassing the range of elevation to be found on the
+    //    Earth."
     auto lower_idx = 2 * ((pixel_coord.Y * MAX_TILE_SIZE) + pixel_coord.X);
     auto upper_idx = lower_idx + 1;
     if (mm.map)
