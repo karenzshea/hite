@@ -20,5 +20,5 @@ struct TileIndex {
 };
 int normalizeCoordToIndex(const IntCoordinate &coordinate);
 void readFileDir(const char* dirpath, std::vector<std::string> &files);
-IntCoordinate parseCoordFromName(std::string fileName);
+IntCoordinate parseCoordFromName(std::string &fileName);
 }

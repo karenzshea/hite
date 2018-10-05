@@ -13,7 +13,7 @@ extern "C" {
 
 namespace hite
 {
-    IntCoordinate parseCoordFromName(std::string fileName)
+    IntCoordinate parseCoordFromName(std::string &fileName)
     {
         // N52E013.hgt => {Lon: 13, Lat: 52}
         std::regex re{".+\\/?([NWSE]{1})([0-9]{2})([NWSE]{1})([0-9]{3})\\.hgt"};
