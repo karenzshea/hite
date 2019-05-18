@@ -1,6 +1,8 @@
+#include <cmath>
 #include <vector>
 #include <array>
 #include <string>
+#include <regex>
 
 #include "tile.hpp"
 #include "constants.hpp"
@@ -20,5 +22,5 @@ struct TileIndex {
 };
 int normalizeCoordToIndex(const IntCoordinate &coordinate);
 void readFileDir(const char* dirpath, std::vector<std::string> &files);
-IntCoordinate parseCoordFromName(std::string &fileName);
+IntCoordinate parseCoordFromName(const std::string &fileName);
 }
